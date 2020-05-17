@@ -6,6 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
 import pickle as pk
+import os
 
 # ml related
 from sklearn import ensemble, tree, linear_model
@@ -21,6 +22,7 @@ warnings.filterwarnings('ignore')
 train_path = "data/train.csv"
 test_path = "data/test.csv"
 real = "data/RealEstate.csv"
+head = 'images/head.jpg'
 
 @st.cache
 def load_train_data(train_path):
@@ -33,6 +35,20 @@ def load_test_data(test_path):
 @st.cache
 def load_data(real):
     return pd.read_csv(real)
+
+
+def save_data(value,res):
+    file = 'db.csv'
+    if not os.path.exists(file):
+        with open(file,'w') as f:
+            f.write("OverallQual,GrLivArea,GarageCars,GarageArea,TotalBsmtSF,fstFlrSF,FullBath,TotRmsAbvGrd,YearBuilt,YearRemodAdd,GarageYrBlt,MasVnrArea,Fireplaces,BsmtFinSF1,Result\n")
+    with open(file,'a') as f:
+        data = f"{OverallQual},{GrLivArea},{GarageCars},{GarageArea},{TotalBsmtSF},{fstFlrSF},{FullBath},{TotRmsAbvGrd},{YearBuilt},{YearRemodAdd},{GarageYrBlt},{MasVnrArea},{Fireplaces},{BsmtFinSF1},{res}\n"        
+        f.write(data)
+
+st.sidebar.image(head, caption="project on Artificial intelligence",use_column_width=True)
+
+
 
 
 st.title("House Pricing Analysis")
@@ -69,16 +85,35 @@ if choices=='House Prediction':
         model=pk.load(open('model & scaler/rfrmodel.pkl','rb'))
         scaler=pk.load(open('model & scaler/scale.pkl','rb'))
         scaler.transform(df)
-        ans=int(model.predict(df))
-        print(type(ans))
-        st.subheader(f"The price is {ans}")
+        ans=int(model.predict(df)) * 5
+        st.subheader(f"The price is {ans} (INR) ")
+        save_data(value,ans)
 
 if choices=='Predicted House':
     st.subheader("Predicted House")
-
-
+    st.info("expand to see data clearly")
+    if os.path.exists("db.csv"):
+        data = pd.read_csv('db.csv')
+        st.write(data)
+    else:
+        st.error("please try some prediction, then the data will be available here")
 if choices=='About':
     st.subheader("About Us")
+    info='''
+        A house value is simply more than location and square footage. Like the features that make up a person, an educated party would want to know all aspects that give a house its value.
+
+        We are going to take advantage of all of the feature variables available to use and use it to analyze and predict house prices.
+
+        We are going to break everything into logical steps that allow us to ensure the cleanest, most realistic data for our model to make accurate predictions from.
+
+        - Load Data and Packages
+        - Analyzing the Test Variable (Sale Price)
+        - Multivariable Analysis
+        - Impute Missing Data and Clean Data
+        - Feature Transformation/Engineering
+        - Modeling and Predictions
+    '''
+    st.markdown(info,unsafe_allow_html=True)
 
 if choices=='Visual':
     st.subheader("Data Visualization")      
