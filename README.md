@@ -5,3 +5,7 @@ run
 ```shell
 pip install -r requirements.txt
 ```
+then
+```shell
+streamit run app.py
+```
